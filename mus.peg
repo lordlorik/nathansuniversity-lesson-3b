@@ -1,0 +1,99 @@
+{
+    var vars = {
+        tempo: 120,
+        octave: 4,
+		duration: 500
+    };
+    
+    var makeTree = function (tag, elements) {
+        switch (elements.length || 0) {
+            case 0: return null;
+            case 1: return elements[0];
+            case 2: return { tag: tag, left: elements[0], right: elements[1] };
+            default: return { tag: tag, left: elements[0], right: makeTree(tag, elements.slice(1)) };
+        }
+    }
+}
+
+start =
+    blankOrComment* piece: piece
+        { return piece; }
+
+space = [ \t]
+		
+blank "blank" =
+    [ \r\n\t]
+
+comment "comment" =
+    "--" [^\r\n]*
+        { return ""; }
+
+blankOrComment =
+    blank
+    / comment
+
+piece =
+	elements: spacedElement*
+        { return makeTree('seq', elements); }
+    / settings
+		{ return []; }
+
+spacedElement =
+    settings element: element blankOrComment*
+        { return element; }
+    
+element =
+    note
+    / rest
+    / sequence
+    / repeat
+    / parallel
+
+settings =
+	blankOrComment* (setting blankOrComment*)*
+	    { return ''; }
+	
+setting "setting" =
+    "@" name: [a-zA-Z0-9-]+ space* "=" space* value: number
+        { vars[name.join('')] = +value; return { }; }
+
+note "note" =
+    pitch: pitch "/" len: length
+        { return { tag: 'note', pitch: pitch, dur: (vars.duration = 4 * 60000 / (len * vars.tempo)) }; }
+    / pitch: pitch ":" dur: number
+        { return { tag: 'note', pitch: pitch, dur: (vars.duration = dur) }; }
+    / pitch: pitch
+        { return { tag: 'note', pitch: pitch, dur: vars.duration }; }
+
+rest "rest" =
+    [rR] "/" len: length
+        { return { tag: 'rest', dur: (vars.duration = 4 * 60000 / (len * vars.tempo)) }; }
+    / [rR] ":" dur: number
+        { return { tag: 'rest', dur: (vars.duration = dur) }; }
+    / [rR]
+        { return { tag: 'rest', dur: vars.duration }; }
+
+sequence "sequence" =
+    "(" elements: spacedElement+ ")"
+        { return makeTree('seq', elements); }
+
+repeat "repeat" =
+    num: number space* "*" space* element: element
+        { return { tag: 'repeat', section: element, count: num }; }
+
+parallel "parallel" =
+    "[" elements: spacedElement+ "]"
+        { return makeTree('par', elements); }
+        
+pitch =
+    n: [a-gA-G] s: [b#]? o: [0-9]
+        { return n + (s || '') + (vars.octave = +o); }
+    / n: [a-gA-G] s: [b#]?
+        { return n + (s || '') + vars.octave; }
+
+length =
+    "128" / "64" / "32" / "16" / "8" / "4" / "2" / "1"
+
+number "number" =
+    d: [0-9]+
+        { return +d.join(''); }

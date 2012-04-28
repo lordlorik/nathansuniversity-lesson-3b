@@ -1,0 +1,47 @@
+Assignment for lesson 3 (part 2) of PL101 at http://www.nathansuniversity.com/.
+
+MUS to NOTE compiler using a PEG grammar and the compiler created during lesson
+2. This means that the input for the compiler is the AST format describen in
+that lesson, and the parser generates this as an output.
+
+The syntax for my MUS language is quite simple:
+
+* notes follow the conventional notation (a-g followed optional accident #/b and
+  then by octave)
+* duration can be specified using tempo with a slash (note/length, where
+  length is a power of two in range 1-128) or duration in ms with a colon
+  (note:duration)
+* both the octave and the duration can be omitted, and is assumed to be the
+  same as in the previous note
+* rests are written as r with a duration specified using the same rule as
+  the notes
+* tempo, previous duration and previous octave are "settings" that can be
+  modified using @setting = value where value is a nonnegative integer. The
+  name of these settings are tempo, duration and octave, respectively.
+  Additional settings can be declared, but their value does not affect the
+  piece since they cannot be used in any other way
+* sequences are marked using round parentheses ()
+* parallel blocks are marked using square brackets []
+* repetitions are marked using count * element, where element can be a note, a
+  rest, a sequence, a parallel block or even another rest
+* comments are market with --
+* whitespaces and tabs are always ignored. Comments and newlines are mostly
+  ignored too, but cannot occur inside a repetition or a setting. Since
+  repetitions can take a sequence, this does not mean any serious limitation.
+* everything in the file is implicitely part of a main sequence
+* the compiler optimizes some "dumb" things like repetitions with 0 or 1,
+  single note sequences and single note parallel blocks.
+
+Here's an example:
+
+-- Twinkle Twinkle Little Star
+@octave = 4
+@tempo = 60
+
+c/4 c 2*g 2*a g/2
+f/4 f 2*e 2*d c/2
+2*(
+  g/4 g 2*f 2*e d/2
+)
+c/4 c 2*g 2*a g/2
+f/4 f 2*e 2*d c/2
