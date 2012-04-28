@@ -95,12 +95,10 @@ assert.deepEqual(parse('r/2', 'rest'), { tag: 'rest', dur: 1000 });
 assert.deepEqual(parse('r', 'rest'), { tag: 'rest', dur: 500 });
 
 // Sequence
-assert.deepEqual(parse('(e6:2000)', 'sequence'), { tag: 'note', pitch: 'e6', dur: 2000 });
 assert.deepEqual(parse('(d1:125 g2:250)', 'sequence'), { tag: 'seq', left: { tag: 'note', pitch: 'd1', dur: 125 }, right: { tag: 'note', pitch: 'g2', dur: 250 } });
 assert.deepEqual(parse('(a1:100 b2:200 c3:400)', 'sequence'), { tag: 'seq', left: { tag: 'note', pitch: 'a1', dur: 100 }, right: { tag: 'seq', left: { tag: 'note', pitch: 'b2', dur: 200 }, right: { tag: 'note', pitch: 'c3', dur: 400 } } });
 
 // Parallel
-assert.deepEqual(parse('[e6:2000]', 'parallel'), { tag: 'note', pitch: 'e6', dur: 2000 });
 assert.deepEqual(parse('[d1:125 g2:250]', 'parallel'), { tag: 'par', left: { tag: 'note', pitch: 'd1', dur: 125 }, right: { tag: 'note', pitch: 'g2', dur: 250 } });
 assert.deepEqual(parse('[a1:100 b2:200 c3:400]', 'parallel'), { tag: 'par', left: { tag: 'note', pitch: 'a1', dur: 100 }, right: { tag: 'par', left: { tag: 'note', pitch: 'b2', dur: 200 }, right: { tag: 'note', pitch: 'c3', dur: 400 } } });
 
@@ -114,6 +112,12 @@ assert.deepEqual(parse('44 * [d1:125 g2:250]', 'repeat'), { tag: 'repeat', count
 assert.deepEqual(parse('@octave = 3\n@tempo=60\na/4 b/2'), { tag: 'seq', left: { tag: 'note', pitch: 'a3', dur: 1000 }, right: { tag: 'note', pitch: 'b3', dur: 2000 } });
 assert.deepEqual(parse('@octave = 7\n@tempo=75\na/4 b/2'), { tag: 'seq', left: { tag: 'note', pitch: 'a7', dur: 800 }, right: { tag: 'note', pitch: 'b7', dur: 1600 } });
 assert.deepEqual(parse('@duration = 333\na b'), { tag: 'seq', left: { tag: 'note', pitch: 'a4', dur: 333 }, right: { tag: 'note', pitch: 'b4', dur: 333 } });
+
+// Optimizations 
+assert.deepEqual(parse('(e6:2000)', 'sequence'), { tag: 'note', pitch: 'e6', dur: 2000 });
+assert.deepEqual(parse('[e6:2000]', 'parallel'), { tag: 'note', pitch: 'e6', dur: 2000 });
+assert.deepEqual(parse('1 * a3:125', 'repeat'), { tag: 'note', pitch: 'a3', dur: 125 });
+assert.deepEqual(parse('0 * a3:125', 'repeat'), { tag: 'rest', dur: 0 });
 
 // Complex piece
 
