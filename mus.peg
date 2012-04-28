@@ -79,7 +79,7 @@ sequence "sequence" =
 
 repeat "repeat" =
     num: number space* "*" space* element: element
-        { return { tag: 'repeat', section: element, count: num }; }
+        { return num > 0 ? { tag: 'repeat', section: element, count: num } : { tag: 'rest', dur: 0 }; }
 
 parallel "parallel" =
     "[" elements: spacedElement+ "]"
