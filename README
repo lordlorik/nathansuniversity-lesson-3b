@@ -6,17 +6,17 @@ that lesson, and the parser generates this as an output.
 
 The syntax for my MUS language is quite simple:
 
-* notes follow the conventional notation (a-g followed optional accident #/b and
-  then by octave)
-* duration can be specified using tempo with a slash (note/length, where
-  length is a power of two in range 1-128) or duration in ms with a colon
-  (note:duration)
+* notes follow the conventional notation (a-g followed by optional accident
+  #/b and then by octave)
+* duration can be specified using the tempo of the piece and a note length
+  with a slash (note/length, where length is a power of two in range 1-128) or
+  duration in ms with a colon (note:duration)
 * both the octave and the duration can be omitted, and is assumed to be the
   same as in the previous note
-* rests are written as r with a duration specified using the same rule as
+* rests are written as r with a duration specified using the same rules as
   the notes
 * tempo, previous duration and previous octave are "settings" that can be
-  modified using @setting = value where value is a nonnegative integer. The
+  modified using @setting = value where value is a non-negative integer. The
   name of these settings are tempo, duration and octave, respectively.
   Additional settings can be declared, but their value does not affect the
   piece since they cannot be used in any other way
@@ -24,10 +24,10 @@ The syntax for my MUS language is quite simple:
 * parallel blocks are marked using square brackets []
 * repetitions are marked using count * element, where element can be a note, a
   rest, a sequence, a parallel block or even another rest
-* comments are market with --
+* comments are marked with --
 * whitespaces and tabs are always ignored. Comments and newlines are mostly
   ignored too, but cannot occur inside a repetition or a setting. Since
-  repetitions can take a sequence, this does not mean any serious limitation.
+  repetitions can take a sequence, this is not a serious limitation.
 * everything in the file is implicitely part of a main sequence
 * the compiler optimizes some "dumb" things like repetitions with 0 or 1,
   single note sequences and single note parallel blocks.
