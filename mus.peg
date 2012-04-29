@@ -2,7 +2,7 @@
     var vars = {
         tempo: 120,
         octave: 4,
-		duration: 500
+        duration: 500
     };
     
     var makeTree = function (tag, elements) {
@@ -12,7 +12,11 @@
             case 2: return { tag: tag, left: elements[0], right: elements[1] };
             default: return { tag: tag, left: elements[0], right: makeTree(tag, elements.slice(1)) };
         }
-    }
+    };
+    
+    var lenToDur = function (len) {
+        return 4 * 60000 / (len * vars.tempo);
+    };
 }
 
 start =
@@ -20,23 +24,23 @@ start =
         { return piece; }
 
 space = [ \t]
-		
+        
 blank "blank" =
     [ \r\n\t]
 
 comment "comment" =
     "--" [^\r\n]*
-        { return ""; }
+        { return ''; }
 
 blankOrComment =
     blank
     / comment
 
 piece =
-	elements: spacedElement*
+    elements: spacedElement*
         { return makeTree('seq', elements); }
     / settings
-		{ return []; }
+        { return []; }
 
 spacedElement =
     settings element: element blankOrComment*
@@ -50,16 +54,16 @@ element =
     / parallel
 
 settings =
-	blankOrComment* (setting blankOrComment*)*
-	    { return ''; }
-	
+    blankOrComment* (setting blankOrComment*)*
+        { return ''; }
+    
 setting "setting" =
     "@" name: [a-zA-Z0-9-]+ space* "=" space* value: number
         { vars[name.join('')] = +value; return { }; }
 
 note "note" =
     pitch: pitch "/" len: length
-        { return { tag: 'note', pitch: pitch, dur: (vars.duration = 4 * 60000 / (len * vars.tempo)) }; }
+        { return { tag: 'note', pitch: pitch, dur: (vars.duration = lenToDur(len)) }; }
     / pitch: pitch ":" dur: number
         { return { tag: 'note', pitch: pitch, dur: (vars.duration = dur) }; }
     / pitch: pitch
@@ -67,7 +71,7 @@ note "note" =
 
 rest "rest" =
     [rR] "/" len: length
-        { return { tag: 'rest', dur: (vars.duration = 4 * 60000 / (len * vars.tempo)) }; }
+        { return { tag: 'rest', dur: (vars.duration = lenToDur(len)) }; }
     / [rR] ":" dur: number
         { return { tag: 'rest', dur: (vars.duration = dur) }; }
     / [rR]
@@ -87,9 +91,9 @@ parallel "parallel" =
         
 pitch =
     n: [a-gA-G] s: [b#]? o: [0-9]
-        { return n + (s || '') + (vars.octave = +o); }
+        { return n.toLowerCase() + (s || '') + (vars.octave = +o); }
     / n: [a-gA-G] s: [b#]?
-        { return n + (s || '') + vars.octave; }
+        { return n.toLowerCase() + (s || '') + vars.octave; }
 
 length =
     "128" / "64" / "32" / "16" / "8" / "4" / "2" / "1"
